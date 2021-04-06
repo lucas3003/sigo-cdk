@@ -1,0 +1,73 @@
+<definitions name = "LegacyIntegrator"
+   targetNamespace = "http://www.examples.com/wsdl/LegacyIntegrator.wsdl"
+   xmlns = "http://schemas.xmlsoap.org/wsdl/"
+   xmlns:soap = "http://schemas.xmlsoap.org/wsdl/soap/"
+   xmlns:tns = "http://www.examples.com/wsdl/LegacyIntegrator.wsdl"
+   xmlns:xsd = "http://www.w3.org/2001/XMLSchema">
+
+    <message name= "Supply">
+        <part name="id" type="xsd:string"/>
+        <part name="description" type="xsd:string" minOccurs="0" maxOccurs="1" />
+        <part name="qty" type="xsd:long" minOccurs="0" maxOccurs="1" />
+        <part name="countryOfOrigin" type="xsd:long" minOccurs="0" maxOccurs="1" />
+        <part name="totalAmount" type="xsd:long" minOccurs="0" maxOccurs="1" />
+    </message>
+
+    <message name="ResponseStatus">
+        <part name="status" type="xsd:string" />
+    </message>
+
+    <portType name = "LegacyIntegratorPort">
+        <operation name="NewSupply">
+            <input message="tns:Supply" />
+            <output message="tns:ResponseStatus" />
+        </operation>
+        <operation name="UpdateSupply">
+            <input message="tns:Supply" />
+            <output message="tns:ResponseStatus" />
+        </operation>
+    </portType>
+
+    <binding name = "NewSupply_Binding" type = "tns:LegacyIntegratorPort">
+        <soap:binding style = "rpc"
+         transport = "http://schemas.xmlsoap.org/soap/http"/>
+        <operation name = "NewSupply">
+            <soap:operation soapAction = "NewSupply"/>
+            <input>
+                <soap:body encodingStyle = "http://schemas.xmlsoap.org/soap/encoding/" namespace = "urn:examples:LegacyIntegrator" use = "encoded"/>
+            </input>
+            <output>
+                <soap:body encodingStyle = "http://schemas.xmlsoap.org/soap/encoding/" namespace = "urn:examples:LegacyIntegrator" use = "encoded"/>
+            </output>
+        </operation>
+    </binding>
+
+    <binding name = "UpdateSupply_Binding" type = "tns:LegacyIntegratorPort">
+        <soap:binding style = "rpc"
+         transport = "http://schemas.xmlsoap.org/soap/http"/>
+        <operation name = "UpdateSupply">
+            <soap:operation soapAction = "UpdateSupply"/>
+            <input>
+                <soap:body encodingStyle = "http://schemas.xmlsoap.org/soap/encoding/" namespace = "urn:examples:LegacyIntegrator" use = "encoded"/>
+            </input>
+            <output>
+                <soap:body encodingStyle = "http://schemas.xmlsoap.org/soap/encoding/" namespace = "urn:examples:LegacyIntegrator" use = "encoded"/>
+            </output>
+        </operation>
+    </binding>
+
+    <service name = "LegacyIntegrator">
+        <documentation>WSDL File for MyService</documentation>
+
+        <port binding = "tns:NewSupply_Binding" name = "LegacyIntegratorPort">
+            <soap:address
+            location = "http://www.examples.com/NewSupply/" />
+        </port>
+
+        <port binding = "tns:UpdateSupply_Binding" name = "LegacyIntegratorPort">
+            <soap:address
+            location = "http://www.examples.com/UpdateSupply/" />
+        </port>
+    </service>
+
+</definitions>
