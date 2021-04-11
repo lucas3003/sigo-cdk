@@ -20,48 +20,6 @@ export class CdkWorkshopStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    /*const vpc = new ec2.Vpc(this, 'VpcTest');*/
-
-   /* const cluster = new rds.ServerlessCluster(this, 'StandardDatabase', {
-      engine: rds.DatabaseClusterEngine.AURORA_POSTGRESQL,
-      parameterGroup: rds.ParameterGroup.fromParameterGroupName(this, 'ParameterGroup', 'default.aurora-postgresql10'),
-      defaultDatabaseName: 'StandardDB',
-      vpc,
-      //scaling: { autoPause: cdk.Duration.seconds(0) } // Optional. If not set, then instance will pause after 5 minutes 
-    });
-
-    const standardFn = new lambda_nodejs.NodejsFunction(this, 'StandardHandler', {
-      runtime: lambda.Runtime.NODEJS_10_X,
-      entry: 'lambda/standard/standardHandler.js',
-      handler: 'handler',
-      timeout: Duration.seconds(10),
-      environment: {
-        CLUSTER_ARN: cluster.clusterArn,
-        SECRET_ARN: cluster.secret?.secretArn || '',
-        DB_NAME: 'StandardDB',
-        AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
-      },
-    })
-
-    cluster.grantDataApiAccess(standardFn);
-
-    const api = new apigw.RestApi(this, "standard-api", {
-      restApiName: "Standard API",
-      description: "Serves Standards to front-end services"
-    })
-
-    const getStandardsIntegration = new apigw.LambdaIntegration(standardFn, {
-      requestTemplates: { "application/json": '{ "statusCode": "200" }' },
-      proxy: true
-    });
-
-    const standards = api.root.addResource('standards')
-    standards.addMethod("GET", getStandardsIntegration); // GET*/
-
-    /////
-
-    
-
     const topic = new sns.Topic(this, 'Topic', {
       displayName: 'Legacy integrator topic',
       fifo: false,
@@ -89,43 +47,17 @@ export class CdkWorkshopStack extends cdk.Stack {
       healthCheckGracePeriod: Duration.seconds(10000000)
     });
 
-    /*const salesTable = new dynamodb.Table(this, "Sales", {
-      tableName: 'Sales',
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // Use on-demand billing mode
-      partitionKey: { name: "id", type: dynamodb.AttributeType.STRING},
-      sortKey: {name: "productId", type:dynamodb.AttributeType.STRING},
-      removalPolicy: cdk.RemovalPolicy.DESTROY
-    });
-
-    const supplyTable = new dynamodb.Table(this, "Supplies", {
-      tableName: 'Supplies',
-      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
-      sortKey: { name: "qty", type: dynamodb.AttributeType.NUMBER },
-      removalPolicy: cdk.RemovalPolicy.DESTROY
-    });*/
-
-
-
-    //supplyTable.grantReadWriteData(industrialServiceFargate.taskDefinition.taskRole);
-
-    //salesTable.grantReadWriteData(industrialServiceFargate.taskDefinition.taskRole);
 
     new DatabaseStack(scope, "DatabaseStack", {
       readWritePermissions: [industrialServiceFargate.taskDefinition.taskRole]
     })
 
-
-
     //VPC Link not created for prototype. ALB will be exposed to public. I will go back to this if I have time
-
-    //API GATEWAY
 
     const api = new apigw.RestApi(this, "industrial-api", {
       restApiName: "Industrial Service API",
       description: "Industrial Service"
     })
-
 
     const salesIntegration = new apigw.HttpIntegration(`http://${industrialServiceFargate.loadBalancer.loadBalancerDnsName}/sales`);
     const snsNotificationIntegration = new apigw.HttpIntegration(`http://${industrialServiceFargate.loadBalancer.loadBalancerDnsName}/snsnotification`, {
@@ -138,8 +70,6 @@ export class CdkWorkshopStack extends cdk.Stack {
     const snsNotificationResource = api.root.addResource('snsnotification');
     snsNotificationResource.addMethod("POST", snsNotificationIntegration);
     
-    /////
-
     const legacyIntegratorFn = new lambda_nodejs.NodejsFunction(this, 'LegacyIntegratorHandler', {
       runtime: lambda.Runtime.NODEJS_10_X,
       entry: 'lambda/legacy-receiver/legacyIntegratorHandler.js',
